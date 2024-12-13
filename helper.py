@@ -12,3 +12,4 @@ GENERATIONS = {
 
 DIR_BASE = 'sprites'
 DIR_PROCESSED = 'sprites-processed'
+DIR_PROCESSED_COUNTOURS = 'sprites-processed-countours'
