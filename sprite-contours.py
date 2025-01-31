@@ -1,11 +1,8 @@
 from helper import GENERATIONS, DIR_PROCESSED, DIR_PROCESSED_COUNTOURS
 from os import listdir, path, makedirs
-from PIL import Image
 import numpy as np
 import cv2 as cv
  
-
-
 for generation in GENERATIONS.items():
     dir_base = f'{DIR_PROCESSED}\\{generation[1]}'
     dir_processed_countours = f"{DIR_PROCESSED_COUNTOURS}\\{generation[1]}"
