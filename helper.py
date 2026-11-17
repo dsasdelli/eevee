@@ -13,4 +13,9 @@ GENERATIONS = {
 DIR_BASE = 'sprites'
 DIR_PROCESSED = 'sprites-processed'
 DIR_PROCESSED_COUNTOURS = 'sprites-processed-countours'
-DIR_PROCESSED_SHADOWS = 'sprites-processed-shadows'
+DIR_ARTWORK = 'artwork'
+DIR_ARTWORK_PROCESSED = 'artwork-processed'
+DIR_ARTWORK_PROCESSED_COUNTOURS = 'artwork-processed-countours'
+# As artes tem lado maior de 731 px em media; 512 aproveita esse detalhe e casa com a
+# resolucao em que o Stable Diffusion gera. Os sprites continuam em 256.
+ARTWORK_SIZE = 512

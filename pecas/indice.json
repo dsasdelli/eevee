@@ -1,0 +1,662 @@
+[
+ {
+  "id": "abra-orelha-1",
+  "categoria": "orelha",
+  "pokemon": "abra",
+  "geracao": "gen1",
+  "arquivo": "orelha/abra-orelha-1.png",
+  "largura": 103,
+  "altura": 105,
+  "caixa": [
+   295,
+   56,
+   398,
+   161
+  ]
+ },
+ {
+  "id": "alt-pikachu-alt1-olho-1",
+  "categoria": "olho",
+  "pokemon": "alt-pikachu-alt1",
+  "geracao": "gen1",
+  "arquivo": "olho/alt-pikachu-alt1-olho-1.png",
+  "largura": 65,
+  "altura": 70,
+  "caixa": [
+   245,
+   149,
+   310,
+   219
+  ]
+ },
+ {
+  "id": "charmander-olho-1",
+  "categoria": "olho",
+  "pokemon": "charmander",
+  "geracao": "gen1",
+  "arquivo": "olho/charmander-olho-1.png",
+  "largura": 57,
+  "altura": 99,
+  "caixa": [
+   192,
+   47,
+   249,
+   146
+  ]
+ },
+ {
+  "id": "gengar-olho-1",
+  "categoria": "olho",
+  "pokemon": "gengar",
+  "geracao": "gen1",
+  "arquivo": "olho/gengar-olho-1.png",
+  "largura": 129,
+  "altura": 105,
+  "caixa": [
+   218,
+   201,
+   347,
+   306
+  ]
+ },
+ {
+  "id": "dragonite-olho-1",
+  "categoria": "olho",
+  "pokemon": "dragonite",
+  "geracao": "gen1",
+  "arquivo": "olho/dragonite-olho-1.png",
+  "largura": 49,
+  "altura": 52,
+  "caixa": [
+   176,
+   79,
+   225,
+   131
+  ]
+ },
+ {
+  "id": "diglett-nariz-1",
+  "categoria": "nariz",
+  "pokemon": "diglett",
+  "geracao": "gen1",
+  "arquivo": "nariz/diglett-nariz-1.png",
+  "largura": 164,
+  "altura": 124,
+  "caixa": [
+   131,
+   151,
+   295,
+   275
+  ]
+ },
+ {
+  "id": "original-tyranitar-gen2-cauda-1",
+  "categoria": "cauda",
+  "pokemon": "original-tyranitar-gen2",
+  "geracao": "gen2",
+  "arquivo": "cauda/original-tyranitar-gen2-cauda-1.png",
+  "largura": 190,
+  "altura": 132,
+  "caixa": [
+   322,
+   357,
+   512,
+   489
+  ]
+ },
+ {
+  "id": "mankey-cauda-2",
+  "categoria": "cauda",
+  "pokemon": "mankey",
+  "geracao": "gen1",
+  "arquivo": "cauda/mankey-cauda-2.png",
+  "largura": 195,
+  "altura": 156,
+  "caixa": [
+   317,
+   181,
+   512,
+   337
+  ]
+ },
+ {
+  "id": "litleo-pata-1",
+  "categoria": "pata",
+  "pokemon": "litleo",
+  "geracao": "gen6",
+  "arquivo": "pata/litleo-pata-1.png",
+  "largura": 121,
+  "altura": 128,
+  "caixa": [
+   337,
+   303,
+   458,
+   431
+  ]
+ },
+ {
+  "id": "vector-charmeleon-cauda-1",
+  "categoria": "cauda",
+  "pokemon": "vector-charmeleon",
+  "geracao": "gen1",
+  "arquivo": "cauda/vector-charmeleon-cauda-1.png",
+  "largura": 170,
+  "altura": 424,
+  "caixa": [
+   0,
+   0,
+   170,
+   424
+  ]
+ },
+ {
+  "id": "vaporeon-olho-1",
+  "categoria": "olho",
+  "pokemon": "vaporeon",
+  "geracao": "gen1",
+  "arquivo": "olho/vaporeon-olho-1.png",
+  "largura": 45,
+  "altura": 51,
+  "caixa": [
+   264,
+   135,
+   309,
+   186
+  ]
+ },
+ {
+  "id": "vaporeon-orelha-1",
+  "categoria": "orelha",
+  "pokemon": "vaporeon",
+  "geracao": "gen1",
+  "arquivo": "orelha/vaporeon-orelha-1.png",
+  "largura": 154,
+  "altura": 186,
+  "caixa": [
+   300,
+   10,
+   454,
+   196
+  ]
+ },
+ {
+  "id": "vaporeon-boca-1",
+  "categoria": "boca",
+  "pokemon": "vaporeon",
+  "geracao": "gen1",
+  "arquivo": "boca/vaporeon-boca-1.png",
+  "largura": 92,
+  "altura": 57,
+  "caixa": [
+   210,
+   183,
+   302,
+   240
+  ]
+ },
+ {
+  "id": "alt-pikachu-alt1-orelha-1",
+  "categoria": "orelha",
+  "pokemon": "alt-pikachu-alt1",
+  "geracao": "gen1",
+  "arquivo": "orelha/alt-pikachu-alt1-orelha-1.png",
+  "largura": 108,
+  "altura": 153,
+  "caixa": [
+   82,
+   0,
+   190,
+   153
+  ]
+ },
+ {
+  "id": "bulbasaur-boca-1",
+  "categoria": "boca",
+  "pokemon": "bulbasaur",
+  "geracao": "gen1",
+  "arquivo": "boca/bulbasaur-boca-1.png",
+  "largura": 293,
+  "altura": 92,
+  "caixa": [
+   7,
+   284,
+   300,
+   376
+  ]
+ },
+ {
+  "id": "vector-bulbasaur-olho-1",
+  "categoria": "olho",
+  "pokemon": "vector-bulbasaur",
+  "geracao": "gen1",
+  "arquivo": "olho/vector-bulbasaur-olho-1.png",
+  "largura": 133,
+  "altura": 125,
+  "caixa": [
+   229,
+   182,
+   362,
+   307
+  ]
+ },
+ {
+  "id": "vector-feraligatr-pata-1",
+  "categoria": "pata",
+  "pokemon": "vector-feraligatr",
+  "geracao": "gen2",
+  "arquivo": "pata/vector-feraligatr-pata-1.png",
+  "largura": 118,
+  "altura": 122,
+  "caixa": [
+   360,
+   246,
+   478,
+   368
+  ]
+ },
+ {
+  "id": "mewtwo-pata-1",
+  "categoria": "pata",
+  "pokemon": "mewtwo",
+  "geracao": "gen1",
+  "arquivo": "pata/mewtwo-pata-1.png",
+  "largura": 126,
+  "altura": 106,
+  "caixa": [
+   141,
+   406,
+   267,
+   512
+  ]
+ },
+ {
+  "id": "garchomp-asa-1",
+  "categoria": "asa",
+  "pokemon": "garchomp",
+  "geracao": "gen4",
+  "arquivo": "asa/garchomp-asa-1.png",
+  "largura": 149,
+  "altura": 255,
+  "caixa": [
+   363,
+   174,
+   512,
+   429
+  ]
+ },
+ {
+  "id": "fearow-asa-1",
+  "categoria": "asa",
+  "pokemon": "fearow",
+  "geracao": "gen1",
+  "arquivo": "asa/fearow-asa-1.png",
+  "largura": 268,
+  "altura": 307,
+  "caixa": [
+   244,
+   59,
+   512,
+   366
+  ]
+ },
+ {
+  "id": "flareon-olho-1",
+  "categoria": "olho",
+  "pokemon": "flareon",
+  "geracao": "gen1",
+  "arquivo": "olho/flareon-olho-1.png",
+  "largura": 85,
+  "altura": 64,
+  "caixa": [
+   66,
+   255,
+   151,
+   319
+  ]
+ },
+ {
+  "id": "umbreon-cauda-1",
+  "categoria": "cauda",
+  "pokemon": "umbreon",
+  "geracao": "gen2",
+  "arquivo": "cauda/umbreon-cauda-1.png",
+  "largura": 211,
+  "altura": 198,
+  "caixa": [
+   25,
+   106,
+   236,
+   304
+  ]
+ },
+ {
+  "id": "decidueye-hisuian-asa-1",
+  "categoria": "asa",
+  "pokemon": "decidueye-hisuian",
+  "geracao": "gen7",
+  "arquivo": "asa/decidueye-hisuian-asa-1.png",
+  "largura": 243,
+  "altura": 337,
+  "caixa": [
+   265,
+   7,
+   508,
+   344
+  ]
+ },
+ {
+  "id": "butterfree-asa-1",
+  "categoria": "asa",
+  "pokemon": "butterfree",
+  "geracao": "gen1",
+  "arquivo": "asa/butterfree-asa-1.png",
+  "largura": 293,
+  "altura": 475,
+  "caixa": [
+   219,
+   18,
+   512,
+   493
+  ]
+ },
+ {
+  "id": "mr-mime-boca-1",
+  "categoria": "boca",
+  "pokemon": "mr-mime",
+  "geracao": "gen1",
+  "arquivo": "boca/mr-mime-boca-1.png",
+  "largura": 94,
+  "altura": 67,
+  "caixa": [
+   172,
+   147,
+   266,
+   214
+  ]
+ },
+ {
+  "id": "infernape-pata-1",
+  "categoria": "pata",
+  "pokemon": "infernape",
+  "geracao": "gen4",
+  "arquivo": "pata/infernape-pata-1.png",
+  "largura": 161,
+  "altura": 140,
+  "caixa": [
+   296,
+   342,
+   457,
+   482
+  ]
+ },
+ {
+  "id": "original-scizor-gen2-olho-1",
+  "categoria": "olho",
+  "pokemon": "original-scizor-gen2",
+  "geracao": "gen2",
+  "arquivo": "olho/original-scizor-gen2-olho-1.png",
+  "largura": 43,
+  "altura": 54,
+  "caixa": [
+   241,
+   121,
+   284,
+   175
+  ]
+ },
+ {
+  "id": "original-charizard-gen1-asa-1",
+  "categoria": "asa",
+  "pokemon": "original-charizard-gen1",
+  "geracao": "gen1",
+  "arquivo": "asa/original-charizard-gen1-asa-1.png",
+  "largura": 310,
+  "altura": 284,
+  "caixa": [
+   202,
+   4,
+   512,
+   288
+  ]
+ },
+ {
+  "id": "mamoswine-nariz-1",
+  "categoria": "nariz",
+  "pokemon": "mamoswine",
+  "geracao": "gen4",
+  "arquivo": "nariz/mamoswine-nariz-1.png",
+  "largura": 81,
+  "altura": 81,
+  "caixa": [
+   184,
+   150,
+   265,
+   231
+  ]
+ },
+ {
+  "id": "mamoswine-chifre-2",
+  "categoria": "chifre",
+  "pokemon": "mamoswine",
+  "geracao": "gen4",
+  "arquivo": "chifre/mamoswine-chifre-2.png",
+  "largura": 191,
+  "altura": 201,
+  "caixa": [
+   0,
+   207,
+   191,
+   408
+  ]
+ },
+ {
+  "id": "seel-nariz-1",
+  "categoria": "nariz",
+  "pokemon": "seel",
+  "geracao": "gen1",
+  "arquivo": "nariz/seel-nariz-1.png",
+  "largura": 37,
+  "altura": 33,
+  "caixa": [
+   167,
+   386,
+   204,
+   419
+  ]
+ },
+ {
+  "id": "vector-tangela-olho-1",
+  "categoria": "olho",
+  "pokemon": "vector-tangela",
+  "geracao": "gen1",
+  "arquivo": "olho/vector-tangela-olho-1.png",
+  "largura": 101,
+  "altura": 106,
+  "caixa": [
+   228,
+   186,
+   329,
+   292
+  ]
+ },
+ {
+  "id": "weepinbell-boca-1",
+  "categoria": "boca",
+  "pokemon": "weepinbell",
+  "geracao": "gen1",
+  "arquivo": "boca/weepinbell-boca-1.png",
+  "largura": 192,
+  "altura": 225,
+  "caixa": [
+   65,
+   242,
+   257,
+   467
+  ]
+ },
+ {
+  "id": "lickitung-boca-1",
+  "categoria": "boca",
+  "pokemon": "lickitung",
+  "geracao": "gen1",
+  "arquivo": "boca/lickitung-boca-1.png",
+  "largura": 295,
+  "altura": 371,
+  "caixa": [
+   0,
+   100,
+   295,
+   471
+  ]
+ },
+ {
+  "id": "ditto-corpo-1",
+  "categoria": "corpo",
+  "pokemon": "ditto",
+  "geracao": "gen1",
+  "arquivo": "corpo/ditto-corpo-1.png",
+  "largura": 512,
+  "altura": 349,
+  "caixa": [
+   0,
+   161,
+   512,
+   510
+  ]
+ },
+ {
+  "id": "original-pikachu-gen1-alt3-corpo-1",
+  "categoria": "corpo",
+  "pokemon": "original-pikachu-gen1-alt3",
+  "geracao": "gen1",
+  "arquivo": "corpo/original-pikachu-gen1-alt3-corpo-1.png",
+  "largura": 500,
+  "altura": 421,
+  "caixa": [
+   12,
+   91,
+   512,
+   512
+  ]
+ },
+ {
+  "id": "vector-gogoat-chifre-1",
+  "categoria": "chifre",
+  "pokemon": "vector-gogoat",
+  "geracao": "gen6",
+  "arquivo": "chifre/vector-gogoat-chifre-1.png",
+  "largura": 313,
+  "altura": 150,
+  "caixa": [
+   44,
+   0,
+   357,
+   150
+  ]
+ },
+ {
+  "id": "original-horsea-gen1-boca-1",
+  "categoria": "boca",
+  "pokemon": "original-horsea-gen1",
+  "geracao": "gen1",
+  "arquivo": "boca/original-horsea-gen1-boca-1.png",
+  "largura": 141,
+  "altura": 174,
+  "caixa": [
+   0,
+   6,
+   141,
+   180
+  ]
+ },
+ {
+  "id": "beedrill-olho-1",
+  "categoria": "olho",
+  "pokemon": "beedrill",
+  "geracao": "gen1",
+  "arquivo": "olho/beedrill-olho-1.png",
+  "largura": 73,
+  "altura": 72,
+  "caixa": [
+   205,
+   109,
+   278,
+   181
+  ]
+ },
+ {
+  "id": "blaziken-pata-1",
+  "categoria": "pata",
+  "pokemon": "blaziken",
+  "geracao": "gen3",
+  "arquivo": "pata/blaziken-pata-1.png",
+  "largura": 115,
+  "altura": 91,
+  "caixa": [
+   56,
+   171,
+   171,
+   262
+  ]
+ },
+ {
+  "id": "arbok-cauda-1",
+  "categoria": "cauda",
+  "pokemon": "arbok",
+  "geracao": "gen1",
+  "arquivo": "cauda/arbok-cauda-1.png",
+  "largura": 192,
+  "altura": 251,
+  "caixa": [
+   7,
+   246,
+   199,
+   497
+  ]
+ },
+ {
+  "id": "cubone-nariz-1",
+  "categoria": "nariz",
+  "pokemon": "cubone",
+  "geracao": "gen1",
+  "arquivo": "nariz/cubone-nariz-1.png",
+  "largura": 154,
+  "altura": 134,
+  "caixa": [
+   106,
+   180,
+   260,
+   314
+  ]
+ },
+ {
+  "id": "goldeen-boca-1",
+  "categoria": "boca",
+  "pokemon": "goldeen",
+  "geracao": "gen1",
+  "arquivo": "boca/goldeen-boca-1.png",
+  "largura": 64,
+  "altura": 65,
+  "caixa": [
+   365,
+   275,
+   429,
+   340
+  ]
+ },
+ {
+  "id": "gengar-boca-1",
+  "categoria": "boca",
+  "pokemon": "gengar",
+  "geracao": "gen1",
+  "arquivo": "boca/gengar-boca-1.png",
+  "largura": 263,
+  "altura": 172,
+  "caixa": [
+   89,
+   221,
+   352,
+   393
+  ]
+ }
+]
