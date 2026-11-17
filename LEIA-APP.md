@@ -54,8 +54,8 @@ categoria. Dois modos:
   um décimo de segundo.
 
 A peça sai do **contorno** do Pokémon, não da arte colorida: o traço é exatamente o que
-o modelo viu no treino. Dentro do recorte o branco é opaco, então as peças se cobrem
-como papel recortado.
+o modelo viu no treino. A peça guarda só a tinta: o branco é transparente, então pôr
+uma peça sobre outra (ou sobre o lápis) soma os traços em vez de esconder o de baixo.
 
 **Montar** (aba Desenhar): clique numa peça da paleta, ou arraste-a para a tela. Em
 **Mover peças**, arraste para posicionar e use os cantos para girar e redimensionar.

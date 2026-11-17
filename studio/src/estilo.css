@@ -103,7 +103,7 @@ input[type=search] {
 .lista button small { color: var(--tinta3); }
 .lista button.ativo small { color: var(--acento); }
 
-/* xadrez atras das pecas: mostra o que e transparente e o que e branco opaco */
+/* xadrez atras das pecas: mostra que so o traco e opaco */
 .categoria h3 { font-size: 13px; margin: 12px 0 6px; color: var(--tinta2); font-weight: 600; }
 .categoria h3 small { color: var(--tinta3); font-weight: 400; }
 .pecas { display: flex; flex-wrap: wrap; gap: 8px; }

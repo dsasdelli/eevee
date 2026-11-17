@@ -1,9 +1,10 @@
 """Biblioteca de pecas (olhos, orelhas, caudas...) recortadas dos contornos de artwork.
 
-Uma peca e um PNG RGBA tirado de `artwork-processed-countours`: dentro do laco fica o
-contorno como esta (traco preto, interior BRANCO OPACO), fora fica transparente. O
-branco opaco faz as pecas se cobrirem como papel recortado: uma cabeca posta sobre o
-corpo esconde as linhas do corpo por baixo dela.
+Uma peca e um PNG RGBA tirado de `artwork-processed-countours` que guarda SO A TINTA:
+o traco preto dentro do laco e opaco, todo o resto (o branco de dentro inclusive) e
+transparente. Assim uma peca posta sobre outra, ou sobre o lapis, nao apaga o que esta
+por baixo: os tracos se somam, como num desenho a mao. (A primeira versao guardava o
+interior branco opaco, como papel recortado, e isso escondia o desenho; ver so_tinta.)
 
 O recorte e feito aqui, e nao no navegador, para sair do PNG original de 512 px sem
 nenhuma reamostragem: o traco da peca e exatamente o traco que o modelo viu no treino.
@@ -92,11 +93,9 @@ def salvar_peca(geracao, nome, categoria, poligono):
     w, h = contorno.size
     caixa = (max(0, x0 - MARGEM), max(0, y0 - MARGEM), min(w, x1 + MARGEM), min(h, y1 + MARGEM))
 
-    rgba = Image.merge('RGBA', (contorno, contorno, contorno, mascara)).crop(caixa)
+    rgba = so_tinta(Image.merge('RGBA', (contorno, contorno, contorno, mascara)).crop(caixa))
     # Peca sem nenhuma tinta e quase sempre um laco errado (caiu no fundo branco).
-    # Tinta e ESCURO (< 128), como o pix2pix_data.py le o traco.
-    a = np.asarray(rgba)
-    if not ((a[..., 0] < 128) & (a[..., 3] > 0)).any():
+    if not (np.asarray(rgba)[..., 3] > 0).any():
         raise ValueError('o laco nao pegou nenhum traco')
 
     with _trava:
@@ -115,6 +114,18 @@ def salvar_peca(geracao, nome, categoria, poligono):
         itens.append(item)
         _gravar_indice(itens)
     return item
+
+
+def so_tinta(rgba):
+    """Deixa so o traco: cor preta, e opacidade = quao escuro o pixel era (vezes a
+    opacidade que ja tinha). O branco vira transparente. Os contornos sao binarios,
+    entao na pratica o alfa sai 0 ou 255; a formula continua certa se um dia nao forem."""
+    a = np.asarray(rgba.convert('RGBA')).astype(np.uint16)
+    cinza = a[..., :3].mean(axis=2)
+    alfa = ((255 - cinza) * a[..., 3] / 255).round().astype(np.uint8)
+    saida = np.zeros(a.shape, np.uint8)
+    saida[..., 3] = alfa
+    return Image.fromarray(saida, 'RGBA')
 
 
 def apagar_peca(ident):
