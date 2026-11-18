@@ -74,6 +74,10 @@ MODELOS = [
     ('sprite-aug-8k', 'Sprite 9 geracoes (aug 8000)', 'LoRA sprite', 'lora-sprite-aug/lora-step008000.safetensors', 'augmentacao de pixel art'),
     ('gen9-aug-2k', 'Gen 9 (aug 2000)',  'LoRA sprite', 'lora-gen9-aug/lora-step002000.safetensors', 'augmentacao de pixel art'),
     ('gen9-aug-4k', 'Gen 9 (aug 4000)',  'LoRA sprite', 'lora-gen9-aug/lora-step004000.safetensors', 'augmentacao de pixel art'),
+    ('anime-aug-4k', 'Anime (aug 4000)',  'LoRA anime', 'lora-anime-aug/lora-step004000.safetensors', '1.222 artes de anime (Fandom), split proprio'),
+    ('anime-aug-8k', 'Anime (aug 8000)',  'LoRA anime', 'lora-anime-aug/lora-step008000.safetensors', 'idem'),
+    ('art-anime-aug-8k',  'Artwork + anime (aug 8000)',  'LoRA artwork', 'lora-art-anime-aug/lora-step008000.safetensors', '2.532 artwork + 1.222 anime'),
+    ('art-anime-aug-12k', 'Artwork + anime (aug 12000)', 'LoRA artwork', 'lora-art-anime-aug/lora-step012000.safetensors', 'idem'),
 ]
 
 
@@ -314,6 +318,12 @@ def main():
 
     if not args.so_html:
         pend = [m for m in MODELOS if res.get(m[0], {}).get('versao') != VERSAO]
+        # Um .safetensors que ainda nao existe (treino que falhou ou nao rodou) fica para
+        # a proxima vez, em vez de derrubar a medicao dos outros.
+        faltam = [m for m in pend if m[3].endswith('.safetensors') and not (RAIZ / m[3]).exists()]
+        for m in faltam:
+            print(f'pulado, arquivo ainda nao existe: {m[3]}', flush=True)
+        pend = [m for m in pend if m not in faltam]
         precisa_ref = res.get('__ref__', {}).get('versao') != VERSAO
         if pend or precisa_ref:
             dino = Dino()
