@@ -53,9 +53,9 @@ def contorno(caminho, desfoque, bloco, c):
 def tinta(out):
     """Fracao de pixels de TRACO.
 
-    O traco e ESCURO sobre fundo claro -- conferido no conjunto que treinou o pix2pix:
-    `sprites-processed-countours` tem 13,4% de pixels escuros contra 86,6% claros, e o
-    `pix2pix_data.py` le o traco com `< 128`. O `drawContours` preenchido pinta o FUNDO
+    O traco e ESCURO sobre fundo claro -- conferido em
+    `sprites-processed-countours`: 13,4% de pixels escuros contra 86,6% claros, lendo o
+    traco com `< 128`. O `drawContours` preenchido pinta o FUNDO
     de branco e o que sobra escuro sao as linhas; medir o que esta aceso daria a
     fracao de fundo, que e o complemento (foi o erro da primeira versao: 92,7%).
     """

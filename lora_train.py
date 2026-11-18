@@ -16,9 +16,8 @@ legenda a rede aprende a associar nome a aparencia, e o objetivo aqui e justamen
 contrario -- criatura inedita no estilo certo. Todas as amostras levam a mesma frase,
 entao o unico sinal que a LoRA pode extrair e o estilo comum a elas.
 
-So o SPLIT DE TREINO entra. A divisao e a mesma de pix2pix_data.fixed_split, com a
-mesma semente, para que os 1.000 pares de teste continuem nunca vistos e a bancada de
-avaliacao do projeto siga valendo entre os dois caminhos.
+So o SPLIT DE TREINO entra. A divisao e a de esboco.fixed_split, com semente fixa,
+para que os 1.000 pares de teste continuem nunca vistos.
 
 Escala NEAREST para 512. Os sprites sao 256x256 de pixel art; interpolacao suave
 inventaria tons intermediarios e ensinaria a LoRA a borrar justamente a borda dura
@@ -42,7 +41,7 @@ from transformers import CLIPTextModel, CLIPTokenizer
 
 from aug_artwork import augmenta, augmenta_pixel, borda_branca
 from helper import DIR_ARTWORK, DIR_ARTWORK_PROCESSED
-from pix2pix_data import fixed_split, list_pairs
+from esboco import fixed_split, list_pairs
 
 BASE = 'stable-diffusion-v1-5/stable-diffusion-v1-5'
 # Token raro de proposito: 'pkmnsprite' nao e palavra comum no vocabulario do CLIP,
@@ -90,13 +89,13 @@ class Sprites(Dataset):
 
 
 TESTE_ARTWORK = 300        # quantas artes ficam fora do treino
-SEMENTE_ARTWORK = 1337     # a mesma de pix2pix_data.fixed_split, por coerencia
+SEMENTE_ARTWORK = 1337     # a mesma de esboco.fixed_split, por coerencia
 
 
 def caminhos_artwork(categoria=None):
     """Caminhos de treino do conjunto de artwork, com um split de teste reservado.
 
-    O `fixed_split` de pix2pix_data nao serve aqui: ele e indexado sobre os 4.289
+    O `fixed_split` de esboco nao serve aqui: ele e indexado sobre os 4.289
     pares de SPRITES, e artwork e outro conjunto, com 2.832 imagens e nomes proprios.
     Mas a ideia e a mesma -- sorteio deterministico, com a mesma semente, para que o
     conjunto de teste seja estavel entre rodadas e as medicoes continuem comparaveis.
@@ -156,7 +155,7 @@ def parse_args():
     p.add_argument('--workers', type=int, default=4)
     p.add_argument('--dados', choices=['sprites', 'artwork'], default='sprites',
                    help='de qual conjunto treinar. "sprites" sao os 256x256 de jogo '
-                        '(default, usa o fixed_split de pix2pix_data); "artwork" e a '
+                        '(default, usa o fixed_split de esboco); "artwork" e a '
                         'arte oficial em 512 px de artwork-processed/')
     p.add_argument('--categoria',
                    help='so com --dados artwork: filtra por categoria do indice '

@@ -210,7 +210,7 @@ const Tela = forwardRef(function Tela({ ferramenta, espessura, pecas, aoMudarSel
     },
     exportar() {
       const c = rasterizar();
-      // Fracao de tinta (escuro < 128, como o pix2pix_data.py le). O contorno de
+      // Fracao de tinta (escuro < 128, o mesmo limiar dos contornos do dataset). O contorno de
       // artwork tem ~7%; muito acima disso o esboco sai do que o modelo conhece.
       const d = c.getContext('2d').getImageData(0, 0, LADO, LADO).data;
       let tinta = 0;

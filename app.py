@@ -37,7 +37,7 @@ import pecas
 import sprite3d
 from lora_predict import (GERACAO, NEGATIVO, PROMPT, para_controlnet, pixelizar,
                           tirar_fundo)
-from pix2pix_predict import fit_sketch
+from esboco import fit_sketch
 
 RAIZ = Path(__file__).parent
 # A interface e o app React de studio/; `npm run build` gera esta pasta.

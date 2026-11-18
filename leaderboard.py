@@ -53,9 +53,7 @@ DESENHOS = list(range(1, 11))
 SEMENTES = [0, 1, 2, 3]
 LADO = 512
 
-P2P = RAIZ / 'sprites-processed-countours_torch_training_checkpoints'
-
-# (id, rotulo, familia, fonte, nota). fonte: chave do app.MODELOS (difusao) ou .pt (pix2pix)
+# (id, rotulo, familia, fonte, nota). fonte: chave do app.MODELOS ou caminho de um .safetensors
 MODELOS = [
     ('art-aug-8k',  'Artwork oficial (aug 8000)',   'LoRA artwork', 'art-aug-8k',  'todas as categorias, augmentada'),
     ('art-aug-16k', 'Artwork oficial (aug 16000)',  'LoRA artwork', 'art-aug-16k', 'idem, treino longo'),
@@ -76,14 +74,6 @@ MODELOS = [
     ('sprite-aug-8k', 'Sprite 9 geracoes (aug 8000)', 'LoRA sprite', 'lora-sprite-aug/lora-step008000.safetensors', 'augmentacao de pixel art'),
     ('gen9-aug-2k', 'Gen 9 (aug 2000)',  'LoRA sprite', 'lora-gen9-aug/lora-step002000.safetensors', 'augmentacao de pixel art'),
     ('gen9-aug-4k', 'Gen 9 (aug 4000)',  'LoRA sprite', 'lora-gen9-aug/lora-step004000.safetensors', 'augmentacao de pixel art'),
-    ('p2p-scribble',  'pix2pix paleta+rabisco',     'pix2pix', 'scribble-lam100-step040000.pt',  'melhor pix2pix; aqui sem rabisco, paleta sorteada'),
-    ('p2p-palette',   'pix2pix paleta',             'pix2pix', 'palette-lam100-step040000.pt',   'paleta sorteada'),
-    ('p2p-infantil',  'pix2pix infantil',           'pix2pix', 'infantil-lam100-step040000.pt',  'traco deformado no treino'),
-    ('p2p-skip2',     'pix2pix skip_drop',          'pix2pix', 'skip2-lam100-step040000.pt',     'beco sem saida'),
-    ('p2p-stroke',    'pix2pix aug de traco',       'pix2pix', 'stroke-lam15-transpose-step040000.pt', 'lambda 15'),
-    ('p2p-baseline',  'pix2pix baseline',           'pix2pix', 'baseline-lam100-step040000.pt',  'lambda 100, sem augmentacao'),
-    ('p2p-lam15',     'pix2pix lambda 15',          'pix2pix', 'lam15-step050000.pt',            'o primeiro'),
-    ('p2p-resize',    'pix2pix resize (colapsou)',  'pix2pix', 'resize-lam15-step040000-colapsou.pt', 'decoder resize, colapso de modo'),
 ]
 
 
@@ -148,7 +138,7 @@ def kid(x, y):
 
 # ------------------------------------------------------------------ geracao
 def esbocos():
-    from pix2pix_predict import fit_sketch
+    from esboco import fit_sketch
     return {n: fit_sketch(Image.open(RAIZ / f'sprites-human-drawn/pokemon{n}.bmp'), LADO)
             for n in DESENHOS}
 
@@ -193,33 +183,6 @@ class Difusao:
         return saidas
 
 
-@torch.no_grad()
-def gerar_pix2pix(arquivo, esb):
-    from pix2pix_data import IMG_SIZE, PALETTE_CACHE
-    from pix2pix_model import Generator, in_channels_from_state, up_mode_from_state
-    from pix2pix_predict import fit_sketch, planos_condicionantes, to_pil, to_tensor
-    st = torch.load(P2P / arquivo, map_location='cuda')
-    g = Generator(in_channels=in_channels_from_state(st), img_size=IMG_SIZE,
-                  up_mode=up_mode_from_state(st), skip_drop=st.get('skip_drop', 0)).cuda()
-    g.load_state_dict(st['generator'])
-    g.train()                  # o pix2pix amostra em modo treino (ver memoria do projeto)
-    pals = np.load(PALETTE_CACHE, allow_pickle=True)['palettes']
-    saidas = []
-    for n in DESENHOS:
-        x0 = to_tensor(fit_sketch(Image.open(RAIZ / f'sprites-human-drawn/pokemon{n}.bmp'),
-                                  IMG_SIZE))
-        for s in SEMENTES:
-            torch.manual_seed(s)
-            pal = pals[random.Random(s * 100 + n).randrange(len(pals))]
-            ex = planos_condicionantes(g.in_channels, pal, [], IMG_SIZE, 24)
-            x = x0 if ex is None else torch.cat([x0, ex], 0)
-            out = to_pil(g(x.unsqueeze(0).cuda())[0]).convert('RGB')
-            saidas.append((n, s, out.resize((LADO, LADO), Image.LANCZOS)))
-    del g
-    torch.cuda.empty_cache()
-    return saidas
-
-
 # ------------------------------------------------------------------ referencia
 def artes_teste_e_treino():
     from helper import DIR_ARTWORK_PROCESSED
@@ -254,8 +217,7 @@ def html(res):
             r['posto_' + chave] = i + 1
     for r in linhas:
         r['media'] = (r['posto_fidelidade'] + r['posto_kid'] + r['posto_fundo']) / 3
-    # Ordena pelo ESTILO. A media de postos (v2) punha o pix2pix no topo: ele decalca o
-    # esboco (fidelidade 0,4 px) e nunca tem fundo, mas nao parece arte oficial nenhuma.
+    # Ordena pelo ESTILO, o objetivo do projeto; fidelidade e fundo sao restricoes.
     linhas.sort(key=lambda r: r['kid'])
 
     def celula(r, chave, fmt):
@@ -322,7 +284,7 @@ verde = top 3 da coluna</p>
 {ref_txt}
 <h2>Como ler</h2>
 <ul>
-<li><b>Posição</b> = ordem pelo <b>estilo</b>, o objetivo do projeto. As outras duas colunas são restrições: fidelidade abaixo de ~5 px já é obedecer ao desenho. O pix2pix tem fidelidade quase perfeita porque <i>decalca</i> o traço, e por isso a média dos postos o punha injustamente no topo.</li>
+<li><b>Posição</b> = ordem pelo <b>estilo</b>, o objetivo do projeto. As outras duas colunas são restrições: fidelidade abaixo de ~5 px já é obedecer ao desenho.</li>
 <li><b>Fidelidade ao esboço</b>: distância média (px, quadro de 512) de cada traço do desenho
 até a borda mais próxima na saída. Mede se a forma obedece ao desenho. Não penaliza detalhe
 interno acrescentado.</li>
@@ -330,8 +292,7 @@ interno acrescentado.</li>
 do DINOv2. Mede “parece arte oficial”. Modelos de sprite são julgados contra artwork de
 propósito: o objetivo do projeto é acabamento de arte oficial.</li>
 <li><b>Com fundo</b>: fração das saídas com mais de 30% da borda não-branca.</li>
-<li>Saídas cruas, sem remoção de fundo nem pixelização. pix2pix: paleta sorteada do dataset,
-sem rabisco, saída de 256 px ampliada para 512.</li>
+<li>Saídas cruas, sem remoção de fundo nem pixelização.</li>
 <li>O ControlNet usa força 0,7, 28 passos e CFG 7,5, os padrões do app.</li>
 </ul>
 </main></body></html>'''
@@ -373,11 +334,8 @@ def main():
             dif = None
             for mid, rot, fam, fonte, nota in pend:
                 t0 = time.time()
-                if fam == 'pix2pix':
-                    saidas = gerar_pix2pix(fonte, esb)
-                else:
-                    dif = dif or Difusao()
-                    saidas = dif.gerar(fonte, esb)
+                dif = dif or Difusao()
+                saidas = dif.gerar(fonte, esb)
                 ims = [im for _, _, im in saidas]
                 r = {'versao': VERSAO, 'rotulo': rot, 'familia': fam, 'nota': nota,
                      'fidelidade': float(np.mean([fidelidade(esb[n], im) for n, _, im in saidas])),

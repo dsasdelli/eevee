@@ -21,7 +21,7 @@ from diffusers import ControlNetModel, StableDiffusionControlNetPipeline, UniPCM
 from PIL import Image, ImageDraw
 
 from lora_predict import NEGATIVO, PROMPT, para_controlnet, pixelizar, tirar_fundo
-from pix2pix_predict import fit_sketch
+from esboco import fit_sketch
 
 S = Path(r'C:\Users\Lomir\AppData\Local\Temp\claude\D--Projetos-Github-eevee\6116fa34-1652-486d-b8ec-f1811ba28098\scratchpad')
 ALVOS = [1, 3, 5, 7]
@@ -89,7 +89,7 @@ def main():
         print(rot, 'ok', flush=True)
 
     # Referencia: os sprites reais, no mesmo tamanho de 96 px.
-    from pix2pix_data import fixed_split, list_pairs
+    from esboco import fixed_split, list_pairs
     _, reais = list_pairs()
     _, te = fixed_split(len(reais))
     alvo = [Image.open(reais[i]).resize((96, 96), Image.BOX) for i in te[:60]]

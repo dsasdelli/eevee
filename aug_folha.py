@@ -22,7 +22,7 @@ VARIACOES = 6
 def folha_sprites():
     """12 sprites (gen1 e gen9), original + 6 variacoes, ampliados em NEAREST como no treino."""
     from aug_artwork import augmenta_pixel
-    from pix2pix_data import list_pairs
+    from esboco import list_pairs
     _, reais = list_pairs()
     rnd = random.Random(7)
     escolha = (rnd.sample([p for p in reais if Path(p).parent.name == 'gen1'], 6)

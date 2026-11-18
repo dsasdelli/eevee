@@ -1,9 +1,7 @@
 """Gera sprites a partir de esbocos pelo caminho de difusao: SD 1.5 + ControlNet + LoRA.
 
-E o equivalente do pix2pix_predict.py para a segunda frente do projeto. A diferenca que
-importa esta no --forca: o pix2pix TRACA o esboco (medido, a deformacao da entrada chega
-a saida com 108% a 127% da intensidade), enquanto aqui o esboco e orientacao e a forca
-do condicionamento e um dial continuo. 1,0 segue o traco de perto; 0,4 usa como
+O esboco e orientacao, nao molde: a forca do condicionamento (--forca) e um dial
+continuo. 1,0 segue o traco de perto; 0,4 usa como
 sugestao e redesenha. 0,7 equilibra.
 
     # um rabisco seu
@@ -27,7 +25,7 @@ from diffusers import (ControlNetModel, StableDiffusionControlNetImg2ImgPipeline
                        StableDiffusionControlNetPipeline, UniPCMultistepScheduler)
 from PIL import Image
 
-from pix2pix_predict import SUFFIXES, fit_sketch
+from esboco import SUFFIXES, fit_sketch
 
 BASE = 'stable-diffusion-v1-5/stable-diffusion-v1-5'
 CONTROLNET = 'lllyasviel/control_v11p_sd15_scribble'
@@ -64,8 +62,7 @@ def parse_args():
     p.add_argument('--passos', type=int, default=28, help='passos de difusao')
     p.add_argument('--cfg', type=float, default=7.5, help='peso do prompt')
     p.add_argument('--amostras', type=int, default=1,
-                   help='quantas variacoes por esboco. Ao contrario do pix2pix, que e '
-                        'quase deterministico, aqui cada semente da um bicho diferente')
+                   help='quantas variacoes por esboco; cada semente da um bicho diferente')
     p.add_argument('--semente', type=int, default=42)
     p.add_argument('--prompt', default=PROMPT)
     p.add_argument('--negativo', default=NEGATIVO)

@@ -14,7 +14,7 @@ import torch
 from diffusers import ControlNetModel, StableDiffusionControlNetPipeline, UniPCMultistepScheduler
 from PIL import Image
 
-from pix2pix_predict import fit_sketch
+from esboco import fit_sketch
 
 S = Path(r'C:\Users\Lomir\AppData\Local\Temp\claude\D--Projetos-Github-eevee\6116fa34-1652-486d-b8ec-f1811ba28098\scratchpad')
 LORA = Path(r'D:\Projetos\Github\eevee\lora-pkmnsprite')

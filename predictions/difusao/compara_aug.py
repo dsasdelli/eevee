@@ -16,7 +16,7 @@ from diffusers import ControlNetModel, StableDiffusionControlNetPipeline, UniPCM
 from PIL import Image, ImageDraw
 
 from lora_train import LEGENDA
-from pix2pix_predict import fit_sketch
+from esboco import fit_sketch
 
 RAIZ = Path(r'D:\Projetos\Github\eevee')
 SAIDA = RAIZ / 'predictions/difusao/23-aug-contra-sem-aug.png'

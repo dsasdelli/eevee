@@ -11,7 +11,7 @@ sys.path.insert(0, r'D:\Projetos\Github\eevee')
 from pathlib import Path
 from PIL import Image
 from diffusers import StableDiffusionControlNetPipeline, ControlNetModel, UniPCMultistepScheduler
-from pix2pix_predict import fit_sketch
+from esboco import fit_sketch
 
 S = Path(r'C:\Users\Lomir\AppData\Local\Temp\claude\D--Projetos-Github-eevee\6116fa34-1652-486d-b8ec-f1811ba28098\scratchpad')
 # variant='fp16' e OBRIGATORIO aqui: so os pesos fp16 estao em cache. Sem a flag o
