@@ -20,7 +20,10 @@ As subpastas de geracao sao descobertas no disco, nao em GENERATIONS: a pasta de
 artwork e organizada pela geracao do POKEMON, nao pela do jogo.
 
     python artwork-processer.py
+    python artwork-processer.py --origem artwork-anime --destino artwork-anime-processed \n        --min-lado 450 --excluir Outro
 """
+import argparse
+import csv
 from os import listdir, makedirs, path
 
 from PIL import Image, ImageOps
@@ -56,16 +59,44 @@ def enquadra(im, tamanho=ARTWORK_SIZE):
     return folha
 
 
+def parse_args():
+    p = argparse.ArgumentParser(description=__doc__,
+                                formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument('--origem', default=DIR_ARTWORK)
+    p.add_argument('--destino', default=DIR_ARTWORK_PROCESSED)
+    p.add_argument('--min-lado', type=int, default=0,
+                   help='descarta a arte cujo conteudo recortado tem lado maior abaixo '
+                        'disto. Ampliar 275 px para 512 borra, e resolucao misturada e a '
+                        'diluicao que estragou a LoRA das nove geracoes')
+    p.add_argument('--excluir', default='',
+                   help='categorias do <origem>/indice.csv a descartar, separadas por '
+                        'virgula (ex. Outro)')
+    return p.parse_args()
+
+
 def main():
-    geracoes = sorted(d for d in listdir(DIR_ARTWORK)
-                      if path.isdir(path.join(DIR_ARTWORK, d)))
-    total = vazias = 0
+    args = parse_args()
+    excluidos = set()
+    if args.excluir:
+        cats = {c.strip() for c in args.excluir.split(',') if c.strip()}
+        with open(path.join(args.origem, 'indice.csv'), newline='', encoding='utf-8') as fh:
+            excluidos = {path.basename(l['arquivo'].replace(chr(92), '/'))
+                         for l in csv.DictReader(fh) if l['categoria'] in cats}
+        print(f'excluindo {len(excluidos)} artes das categorias {sorted(cats)}')
+
+    geracoes = sorted(d for d in listdir(args.origem)
+                      if path.isdir(path.join(args.origem, d)))
+    total = vazias = pequenas = fora = 0
     for gen in geracoes:
-        origem = path.join(DIR_ARTWORK, gen)
-        destino = path.join(DIR_ARTWORK_PROCESSED, gen)
+        origem = path.join(args.origem, gen)
+        destino = path.join(args.destino, gen)
         makedirs(destino, exist_ok=True)
         arquivos = [f for f in listdir(origem) if path.splitext(f)[1].lower() in SUFIXOS]
+        feitas = 0
         for f in arquivos:
+            if f in excluidos:
+                fora += 1
+                continue
             im = alfa_para_branco(Image.open(path.join(origem, f)))
             im = recorta(im)
             # Arte inteiramente branca nao tem o que recortar nem enquadrar, e viraria
@@ -74,14 +105,19 @@ def main():
                 print(f'  {gen}/{f}: imagem vazia, pulada')
                 vazias += 1
                 continue
+            if max(im.size) < args.min_lado:
+                pequenas += 1
+                continue
             # Sempre .png na saida: o recorte e o enquadramento nao devem passar por
             # recompressao JPEG, que acrescentaria artefato de bloco justamente nas
             # bordas duras que o extrator de contorno vai ler depois.
             saida = path.splitext(f)[0] + '.png'
             enquadra(im).save(path.join(destino, saida))
             total += 1
-        print(f'{gen}: {len(arquivos)} artes -> {destino}')
-    print(f'{chr(10)}{total} processadas em {ARTWORK_SIZE}x{ARTWORK_SIZE} | vazias {vazias}')
+            feitas += 1
+        print(f'{gen}: {feitas} de {len(arquivos)} artes -> {destino}')
+    print(f'{chr(10)}{total} processadas em {ARTWORK_SIZE}x{ARTWORK_SIZE} | vazias {vazias} | '
+          f'menores que {args.min_lado} px {pequenas} | excluidas por categoria {fora}')
 
 
 if __name__ == '__main__':

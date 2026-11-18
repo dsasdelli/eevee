@@ -40,7 +40,8 @@ from peft import LoraConfig, get_peft_model_state_dict
 from transformers import CLIPTextModel, CLIPTokenizer
 
 from aug_artwork import augmenta, augmenta_pixel, borda_branca
-from helper import DIR_ARTWORK, DIR_ARTWORK_PROCESSED
+from helper import (DIR_ARTWORK, DIR_ARTWORK_ANIME, DIR_ARTWORK_ANIME_PROCESSED,
+                    DIR_ARTWORK_PROCESSED)
 from esboco import fixed_split, list_pairs
 
 BASE = 'stable-diffusion-v1-5/stable-diffusion-v1-5'
@@ -92,7 +93,8 @@ TESTE_ARTWORK = 300        # quantas artes ficam fora do treino
 SEMENTE_ARTWORK = 1337     # a mesma de esboco.fixed_split, por coerencia
 
 
-def caminhos_artwork(categoria=None):
+def caminhos_artwork(categoria=None, raiz=DIR_ARTWORK_PROCESSED, origem=DIR_ARTWORK,
+                     rotulo='artwork'):
     """Caminhos de treino do conjunto de artwork, com um split de teste reservado.
 
     O `fixed_split` de esboco nao serve aqui: ele e indexado sobre os 4.289
@@ -106,13 +108,15 @@ def caminhos_artwork(categoria=None):
     import csv
     import random as _random
 
-    raiz = Path(DIR_ARTWORK_PROCESSED)
+    # Com os padroes, e exatamente o sorteio de sempre: o anime entra por OUTRA chamada,
+    # com split proprio, para nao mexer nas 300 artes de teste do leaderboard.
+    raiz = Path(raiz)
     if not raiz.exists():
         raise SystemExit(f'{raiz} nao existe -- rode artwork-processer.py antes')
 
     permitidos = None
     if categoria:
-        indice = Path(DIR_ARTWORK) / 'indice.csv'
+        indice = Path(origem) / 'indice.csv'
         if not indice.exists():
             raise SystemExit(f'{indice} nao existe, nao da para filtrar por categoria')
         with indice.open(encoding='utf-8') as fh:
@@ -133,7 +137,7 @@ def caminhos_artwork(categoria=None):
     ordem = list(range(len(todos)))
     sorteio.shuffle(ordem)
     treino = sorted(ordem[TESTE_ARTWORK:])
-    rotulo = f'artwork[{categoria}]' if categoria else 'artwork'
+    rotulo = f'{rotulo}[{categoria}]' if categoria else rotulo
     print(f'{rotulo}: {len(todos)} imagens, {len(treino)} de treino, '
           f'{min(TESTE_ARTWORK, len(todos))} reservadas para teste')
     return [todos[i] for i in treino]
@@ -153,12 +157,15 @@ def parse_args():
     p.add_argument('--out', default='lora-pkmnsprite')
     p.add_argument('--save-every', type=int, default=2000)
     p.add_argument('--workers', type=int, default=4)
-    p.add_argument('--dados', choices=['sprites', 'artwork'], default='sprites',
+    p.add_argument('--dados', choices=['sprites', 'artwork', 'anime', 'artwork+anime'],
+                   default='sprites',
                    help='de qual conjunto treinar. "sprites" sao os 256x256 de jogo '
                         '(default, usa o fixed_split de esboco); "artwork" e a '
-                        'arte oficial em 512 px de artwork-processed/')
+                        'arte oficial em 512 px de artwork-processed/; "anime" e a arte de anime de '
+                        'artwork-anime-processed/; "artwork+anime" soma as duas, '
+                        'cada uma com o seu split de teste')
     p.add_argument('--categoria',
-                   help='so com --dados artwork: filtra por categoria do indice '
+                   help='com --dados artwork ou artwork+anime: filtra a parte de ARTWORK por categoria do indice '
                         '(ex. Sugimori). Misturar estilos dilui -- a LoRA das nove '
                         'geracoes saiu blocada por isso')
     p.add_argument('--gen', metavar='GERACOES',
@@ -239,8 +246,12 @@ def main():
     if args.grad_checkpointing:
         unet.enable_gradient_checkpointing()
 
-    if args.dados == 'artwork':
-        paths = caminhos_artwork(args.categoria)
+    if args.dados in ('artwork', 'anime', 'artwork+anime'):
+        paths = []
+        if 'artwork' in args.dados:
+            paths += caminhos_artwork(args.categoria)
+        if 'anime' in args.dados:
+            paths += caminhos_artwork(None, DIR_ARTWORK_ANIME_PROCESSED, DIR_ARTWORK_ANIME, 'anime')
     else:
         _, reais = list_pairs()
         treino_idx, _ = fixed_split(len(reais))
@@ -260,7 +271,7 @@ def main():
               f'sprites de treino  {quebra}')
     print(f'{len(paths)} imagens de treino (o conjunto de teste fica de fora)')
     ld = DataLoader(Sprites(paths, args.size, aug=args.aug,
-                            suave=args.dados == 'artwork'), batch_size=args.batch_size, shuffle=True,
+                            suave=args.dados != 'sprites'), batch_size=args.batch_size, shuffle=True,
                     num_workers=args.workers, drop_last=True, persistent_workers=True)
 
     # A legenda e constante, entao o texto passa pelo CLIP UMA vez e nao a cada passo.
