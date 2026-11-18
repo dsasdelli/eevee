@@ -38,7 +38,7 @@ import time
 from os import makedirs, path
 
 from curl_cffi import requests
-from requests.exceptions import RequestException
+from curl_cffi.requests.exceptions import RequestException
 import yaml
 
 from anime_nomes import analisa, categoria, nomes_unicos
@@ -66,7 +66,6 @@ def busca(sessao, url, params=None, binario=False):
             r.raise_for_status()
             return r.content if binario else r.json()
         except (RequestException, ValueError) as e:
-            print (e.response.text)
             if tentativa == TENTATIVAS:
                 raise
             print(f'    tentativa {tentativa} falhou ({type(e).__name__}), repetindo')
