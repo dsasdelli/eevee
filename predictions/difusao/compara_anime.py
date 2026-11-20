@@ -1,4 +1,5 @@
-"""Folha 27: os 10 desenhos humanos em art-aug-16k, anime-aug-8k e art-anime-aug (8k, 12k).
+"""Folha 27: os 10 desenhos humanos em sugimori-outros-aug-16k, anime-aug-8k e
+sugimori-outros-anime-aug (8k, 12k).
 
 Mesmo pipeline da varre_ckpt.py (ControlNet scribble, forca 0,7, 28 passos, cfg 7,5,
 semente 42), saida CRUA sem tirar_fundo, porque o fundo e um dos criterios.
@@ -20,10 +21,10 @@ from esboco import fit_sketch
 
 RAIZ = Path(r'D:\Projetos\Github\eevee')
 SAIDA = RAIZ / 'predictions/difusao/27-anime-dez-desenhos.png'
-COLUNAS = [('art-aug 16000', 'lora-art-tudo-aug', 16000),
+COLUNAS = [('sug+outros aug 16000', 'lora-sugimori-outros-aug', 16000),
            ('anime-aug 8000', 'lora-anime-aug', 8000),
-           ('art+anime 8000', 'lora-art-anime-aug', 8000),
-           ('art+anime 12000', 'lora-art-anime-aug', 12000)]
+           ('sug+outros+anime 8000', 'lora-sugimori-outros-anime-aug', 8000),
+           ('sug+outros+anime 12000', 'lora-sugimori-outros-anime-aug', 12000)]
 NEG = 'photo, realistic, text, watermark, logo, blurry, grayscale, human, background scenery'
 
 

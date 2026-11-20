@@ -1,4 +1,4 @@
-"""Folha 23: os 10 desenhos humanos em lora-art-tudo (4000) contra lora-art-tudo-aug.
+"""Folha 23: os 10 desenhos humanos em lora-sugimori-outros (4000) contra lora-sugimori-outros-aug.
 
 Mesmo pipeline da varre_ckpt.py (ControlNet scribble, forca 0,7, 28 passos, cfg 7,5,
 semente 42), saida CRUA sem tirar_fundo, porque o fundo e um dos criterios.
@@ -20,8 +20,8 @@ from esboco import fit_sketch
 
 RAIZ = Path(r'D:\Projetos\Github\eevee')
 SAIDA = RAIZ / 'predictions/difusao/23-aug-contra-sem-aug.png'
-COLUNAS = [('art-tudo 4000', 'lora-art-tudo', 4000)] + \
-          [(f'aug {p}', 'lora-art-tudo-aug', p) for p in (4000, 8000, 12000, 16000)]
+COLUNAS = [('sug+outros 4000', 'lora-sugimori-outros', 4000)] + \
+          [(f'aug {p}', 'lora-sugimori-outros-aug', p) for p in (4000, 8000, 12000, 16000)]
 NEG = 'photo, realistic, text, watermark, logo, blurry, grayscale, human, background scenery'
 
 

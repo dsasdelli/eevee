@@ -22,10 +22,9 @@ para 512 de qualquer jeito; 1024 ainda e o dobro disso.
 
 PASTA SEPARADA, DE PROPOSITO
 
-Vai para artwork-anime/, nao para artwork/. O split de teste das artes (as 300 do
-leaderboard) e sorteado sobre tudo que esta em artwork-processed/gen*; misturar aqui
-mudaria o conjunto de teste e tornaria o leaderboard incomparavel. Alem disso, anime e
-outro estilo (traco de cel, sombra chapada) e deve entrar no treino so quando pedido.
+Vai para artwork-anime/, o grupo "anime" (ver helper.py), separado de sugimori e
+outros. Anime e outro estilo (traco de cel, sombra chapada) e deve entrar no treino so
+quando pedido; o teste e o das especies de splits/teste-especies.txt.
 
     python anime-downloader.py                     tudo
     python anime-downloader.py --limite 20         so os vinte primeiros arquivos
@@ -42,11 +41,12 @@ from curl_cffi.requests.exceptions import RequestException
 import yaml
 
 from anime_nomes import analisa, categoria, nomes_unicos
-from helper import DIR_ARTWORK_ANIME
+from helper import dir_artes
 
 API = 'https://pokemon.fandom.com/api.php'
 CATEGORIA = 'Category:Anime artwork'
-INDICE = f'{DIR_ARTWORK_ANIME}/indice.csv'
+DIR_ANIME = dir_artes('anime')
+INDICE = f'{DIR_ANIME}/indice.csv'
 LARGURA = 1024
 PAUSA = 0.4
 TENTATIVAS = 3
@@ -147,13 +147,13 @@ def main():
     if args.limite:
         alvos = alvos[:args.limite]
 
-    makedirs(DIR_ARTWORK_ANIME, exist_ok=True)
+    makedirs(DIR_ANIME, exist_ok=True)
     novo_indice = not path.exists(INDICE) or path.getsize(INDICE) == 0
     ja_no_indice = set()
     if not novo_indice:
         with open(INDICE, newline='', encoding='utf-8') as fh:
             linhas = list(csv.reader(fh))
-        # Sem cabecalho, o filtro --categoria do lora_train.py nao acha as colunas.
+        # Sem cabecalho, o artwork-processer.py nao acha a coluna categoria (--excluir).
         if not linhas or linhas[0] != CABECALHO:
             raise SystemExit(f'{INDICE} sem cabecalho; apague-o e rode de novo para recria-lo')
         ja_no_indice = {(l[0], l[5]) for l in linhas[1:] if len(l) >= 6}
@@ -162,7 +162,7 @@ def main():
     # parte das chamadas a API.
     def destino_de(titulo, slug):
         gen = f"gen{pokemons[slug]['gen']}"
-        return gen, path.join(DIR_ARTWORK_ANIME, gen, nomes[titulo])
+        return gen, path.join(DIR_ANIME, gen, nomes[titulo])
 
     faltam = [a for a in alvos if not path.exists(destino_de(a[0], a[1])[1])]
     enderecos = urls(sessao, [a[0] for a in faltam]) if faltam else {}

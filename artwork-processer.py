@@ -19,8 +19,12 @@ as poucas artes menores que 512, que precisam ser AMPLIADAS, BOX degrada bem mai
 As subpastas de geracao sao descobertas no disco, nao em GENERATIONS: a pasta de
 artwork e organizada pela geracao do POKEMON, nao pela do jogo.
 
-    python artwork-processer.py
-    python artwork-processer.py --origem artwork-anime --destino artwork-anime-processed \n        --min-lado 450 --excluir Outro
+Processa por GRUPO (sugimori, outros, anime; ver helper.py), de artwork-<grupo>/ para
+artwork-<grupo>-processed/. O anime tem filtro proprio por padrao (PADROES): arte com
+conteudo menor que 450 px e a categoria 'Outro' (Mystery Dungeon, Smash) ficam de fora.
+
+    python artwork-processer.py                       os tres grupos
+    python artwork-processer.py --grupo anime
 """
 import argparse
 import csv
@@ -28,9 +32,11 @@ from os import listdir, makedirs, path
 
 from PIL import Image, ImageOps
 
-from helper import ARTWORK_SIZE, DIR_ARTWORK, DIR_ARTWORK_PROCESSED
+from helper import ARTWORK_SIZE, GRUPOS, dir_artes, dir_processadas
 
 SUFIXOS = {'.png', '.jpg', '.jpeg'}
+# (min_lado, categorias excluidas) de cada grupo, quando a linha de comando nao diz.
+PADROES = {'sugimori': (0, ''), 'outros': (0, ''), 'anime': (450, 'Outro')}
 
 
 def alfa_para_branco(im):
@@ -62,34 +68,45 @@ def enquadra(im, tamanho=ARTWORK_SIZE):
 def parse_args():
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument('--origem', default=DIR_ARTWORK)
-    p.add_argument('--destino', default=DIR_ARTWORK_PROCESSED)
-    p.add_argument('--min-lado', type=int, default=0,
+    p.add_argument('--grupo', choices=GRUPOS, action='append',
+                   help='grupo a processar; repita para mais de um (padrao: todos)')
+    p.add_argument('--min-lado', type=int, default=None,
                    help='descarta a arte cujo conteudo recortado tem lado maior abaixo '
                         'disto. Ampliar 275 px para 512 borra, e resolucao misturada e a '
                         'diluicao que estragou a LoRA das nove geracoes')
-    p.add_argument('--excluir', default='',
-                   help='categorias do <origem>/indice.csv a descartar, separadas por '
+    p.add_argument('--excluir', default=None,
+                   help='categorias do indice.csv do grupo a descartar, separadas por '
                         'virgula (ex. Outro)')
     return p.parse_args()
 
 
 def main():
     args = parse_args()
+    for grupo in args.grupo or GRUPOS:
+        min_lado, excluir = PADROES[grupo]
+        if args.min_lado is not None:
+            min_lado = args.min_lado
+        if args.excluir is not None:
+            excluir = args.excluir
+        print(f'== {grupo} (min-lado {min_lado}, excluir {excluir or "nada"})')
+        processa(dir_artes(grupo), dir_processadas(grupo), min_lado, excluir)
+
+
+def processa(origem_raiz, destino_raiz, min_lado, excluir):
     excluidos = set()
-    if args.excluir:
-        cats = {c.strip() for c in args.excluir.split(',') if c.strip()}
-        with open(path.join(args.origem, 'indice.csv'), newline='', encoding='utf-8') as fh:
+    if excluir:
+        cats = {c.strip() for c in excluir.split(',') if c.strip()}
+        with open(path.join(origem_raiz, 'indice.csv'), newline='', encoding='utf-8') as fh:
             excluidos = {path.basename(l['arquivo'].replace(chr(92), '/'))
                          for l in csv.DictReader(fh) if l['categoria'] in cats}
         print(f'excluindo {len(excluidos)} artes das categorias {sorted(cats)}')
 
-    geracoes = sorted(d for d in listdir(args.origem)
-                      if path.isdir(path.join(args.origem, d)))
+    geracoes = sorted(d for d in listdir(origem_raiz)
+                      if path.isdir(path.join(origem_raiz, d)))
     total = vazias = pequenas = fora = 0
     for gen in geracoes:
-        origem = path.join(args.origem, gen)
-        destino = path.join(args.destino, gen)
+        origem = path.join(origem_raiz, gen)
+        destino = path.join(destino_raiz, gen)
         makedirs(destino, exist_ok=True)
         arquivos = [f for f in listdir(origem) if path.splitext(f)[1].lower() in SUFIXOS]
         feitas = 0
@@ -105,7 +122,7 @@ def main():
                 print(f'  {gen}/{f}: imagem vazia, pulada')
                 vazias += 1
                 continue
-            if max(im.size) < args.min_lado:
+            if max(im.size) < min_lado:
                 pequenas += 1
                 continue
             # Sempre .png na saida: o recorte e o enquadramento nao devem passar por
@@ -117,7 +134,7 @@ def main():
             feitas += 1
         print(f'{gen}: {feitas} de {len(arquivos)} artes -> {destino}')
     print(f'{chr(10)}{total} processadas em {ARTWORK_SIZE}x{ARTWORK_SIZE} | vazias {vazias} | '
-          f'menores que {args.min_lado} px {pequenas} | excluidas por categoria {fora}')
+          f'menores que {min_lado} px {pequenas} | excluidas por categoria {fora}')
 
 
 if __name__ == '__main__':

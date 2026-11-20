@@ -12,7 +12,7 @@ antes de ser corrigida, entao a densidade e medida, nao suposta. Medido em 09/11
 com os MESMOS parametros do script de sprites:
 
     sprites-processed-countours (256 px)   13,4% de tinta
-    artwork-processed-countours (512 px)    7,3% de tinta
+    contornos de artwork (512 px)           7,3% de tinta  (sugimori + outros juntos)
     desenho humano de verdade               4% a 8%
 
 Eu esperava o contrario -- a 512 a janela do limiar cobre metade da area relativa, e
@@ -24,6 +24,9 @@ humano, que era exatamente o problema que a augmentacao de traco existia para re
 Os parametros ficam na linha de comando para poder calibrar isso. `--amostra N` mede
 sem gravar nada.
 
+Por padrao gera os contornos de sugimori e outros (artwork-<grupo>-processed-countours),
+que sao os que o estudio usa para recortar pecas; --grupo anime gera os do anime.
+
     python artwork-contours.py                      padrao, igual ao de sprites
     python artwork-contours.py --bloco 9 --c 3      traco mais limpo
     python artwork-contours.py --amostra 40         so mede a tinta, nao grava
@@ -34,7 +37,7 @@ from os import listdir, makedirs, path
 import cv2 as cv
 import numpy as np
 
-from helper import DIR_ARTWORK_PROCESSED, DIR_ARTWORK_PROCESSED_COUNTOURS
+from helper import GRUPOS, dir_contornos, dir_processadas
 
 
 def contorno(caminho, desfoque, bloco, c):
@@ -68,6 +71,8 @@ def parse_args():
     p.add_argument('--desfoque', type=int, default=9, help='lado do kernel gaussiano (impar)')
     p.add_argument('--bloco', type=int, default=5, help='janela do limiar adaptativo (impar)')
     p.add_argument('--c', type=int, default=2, help='constante subtraida do limiar')
+    p.add_argument('--grupo', choices=GRUPOS, action='append',
+                   help='grupo a processar; repita para mais de um (padrao: sugimori e outros)')
     p.add_argument('--amostra', type=int,
                    help='so MEDE a tinta em N imagens e nao grava nada')
     return p.parse_args()
@@ -78,16 +83,18 @@ def main():
     if args.desfoque % 2 == 0 or args.bloco % 2 == 0:
         raise SystemExit('--desfoque e --bloco precisam ser impares')
 
-    geracoes = sorted(d for d in listdir(DIR_ARTWORK_PROCESSED)
-                      if path.isdir(path.join(DIR_ARTWORK_PROCESSED, d)))
+    grupos = args.grupo or ['sugimori', 'outros']
+    # (grupo, geracao) de cada pasta de artes processadas.
+    pastas = [(g, d) for g in grupos for d in sorted(listdir(dir_processadas(g)))
+              if path.isdir(path.join(dir_processadas(g), d))]
     tintas = []
     total = 0
 
     if args.amostra:
         import random
         random.seed(0)
-        todos = [path.join(DIR_ARTWORK_PROCESSED, g, f)
-                 for g in geracoes for f in listdir(path.join(DIR_ARTWORK_PROCESSED, g))]
+        todos = [path.join(dir_processadas(g), gen, f)
+                 for g, gen in pastas for f in listdir(path.join(dir_processadas(g), gen))]
         for caminho in random.sample(todos, min(args.amostra, len(todos))):
             out = contorno(caminho, args.desfoque, args.bloco, args.c)
             if out is not None:
@@ -98,9 +105,9 @@ def main():
               f'p90 {np.percentile(t, 90) * 100:.1f}) em {len(t)} imagens')
         return
 
-    for gen in geracoes:
-        origem = path.join(DIR_ARTWORK_PROCESSED, gen)
-        destino = path.join(DIR_ARTWORK_PROCESSED_COUNTOURS, gen)
+    for g, gen in pastas:
+        origem = path.join(dir_processadas(g), gen)
+        destino = path.join(dir_contornos(g), gen)
         makedirs(destino, exist_ok=True)
         arquivos = listdir(origem)
         for f in arquivos:

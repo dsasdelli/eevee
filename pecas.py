@@ -1,6 +1,7 @@
 """Biblioteca de pecas (olhos, orelhas, caudas...) recortadas dos contornos de artwork.
 
-Uma peca e um PNG RGBA tirado de `artwork-processed-countours` que guarda SO A TINTA:
+Uma peca e um PNG RGBA tirado dos contornos de artwork (`artwork-sugimori-processed-countours`
+e `artwork-outros-processed-countours`) que guarda SO A TINTA:
 o traco preto dentro do laco e opaco, todo o resto (o branco de dentro inclusive) e
 transparente. Assim uma peca posta sobre outra, ou sobre o lapis, nao apaga o que esta
 por baixo: os tracos se somam, como num desenho a mao. (A primeira versao guardava o
@@ -18,8 +19,11 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 RAIZ = Path(__file__).parent
-CONTORNOS = RAIZ / 'artwork-processed-countours'
-ARTES = RAIZ / 'artwork-processed'
+# Grupos de onde saem as pecas. O nome (geracao/pokemon.png) e unico entre eles, entao o
+# indice das pecas guarda so pokemon e geracao, sem o grupo.
+GRUPOS = ('sugimori', 'outros')
+CONTORNOS = [RAIZ / f'artwork-{g}-processed-countours' for g in GRUPOS]
+ARTES = [RAIZ / f'artwork-{g}-processed' for g in GRUPOS]
 PECAS = RAIZ / 'pecas'
 INDICE = PECAS / 'indice.json'
 
@@ -35,13 +39,14 @@ _trava = threading.Lock()
 def listar_pokemons():
     """[{nome, geracao}] de todo contorno que tem a arte colorida correspondente."""
     saida = []
-    for g in sorted(CONTORNOS.iterdir()):
-        if not (g.is_dir() and _GERACAO.match(g.name)):
-            continue
-        for f in sorted(g.glob('*.png')):
-            if (ARTES / g.name / f.name).exists():
-                saida.append({'nome': f.stem, 'geracao': g.name})
-    return saida
+    for contornos, artes in zip(CONTORNOS, ARTES):
+        for g in sorted(contornos.iterdir()):
+            if not (g.is_dir() and _GERACAO.match(g.name)):
+                continue
+            for f in sorted(g.glob('*.png')):
+                if (artes / g.name / f.name).exists():
+                    saida.append({'nome': f.stem, 'geracao': g.name})
+    return sorted(saida, key=lambda d: (d['geracao'], d['nome']))
 
 
 def caminho_imagem(tipo, geracao, nome):
@@ -50,8 +55,11 @@ def caminho_imagem(tipo, geracao, nome):
     if tipo not in ('contorno', 'arte') or not _GERACAO.match(geracao or '') \
             or not _NOME.match(nome or ''):
         return None
-    f = (CONTORNOS if tipo == 'contorno' else ARTES) / geracao / f'{nome}.png'
-    return f if f.exists() else None
+    for raiz in (CONTORNOS if tipo == 'contorno' else ARTES):
+        f = raiz / geracao / f'{nome}.png'
+        if f.exists():
+            return f
+    return None
 
 
 def ler_indice():

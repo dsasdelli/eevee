@@ -40,8 +40,7 @@ from peft import LoraConfig, get_peft_model_state_dict
 from transformers import CLIPTextModel, CLIPTokenizer
 
 from aug_artwork import augmenta, augmenta_pixel, borda_branca
-from helper import (DIR_ARTWORK, DIR_ARTWORK_ANIME, DIR_ARTWORK_ANIME_PROCESSED,
-                    DIR_ARTWORK_PROCESSED)
+from helper import GRUPOS, dir_processadas, especies
 from esboco import fixed_split, list_pairs
 
 BASE = 'stable-diffusion-v1-5/stable-diffusion-v1-5'
@@ -89,58 +88,52 @@ class Sprites(Dataset):
         return a.div_(127.5).sub_(1.0)      # [-1, 1], a faixa que o VAE espera
 
 
-TESTE_ARTWORK = 300        # quantas artes ficam fora do treino
-SEMENTE_ARTWORK = 1337     # a mesma de esboco.fixed_split, por coerencia
+SPLITS = Path(__file__).parent / 'splits'
 
 
-def caminhos_artwork(categoria=None, raiz=DIR_ARTWORK_PROCESSED, origem=DIR_ARTWORK,
-                     rotulo='artwork'):
-    """Caminhos de treino do conjunto de artwork, com um split de teste reservado.
+def especies_de_teste():
+    """As especies de teste, de splits/teste-especies.txt (linhas com # sao comentario)."""
+    lista = SPLITS / 'teste-especies.txt'
+    if not lista.exists():
+        raise SystemExit(f'{lista} nao existe -- rode splits/gera_split.py')
+    return {l.strip() for l in lista.read_text(encoding='utf-8').splitlines()
+            if l.strip() and not l.startswith('#')}
 
-    O `fixed_split` de esboco nao serve aqui: ele e indexado sobre os 4.289
-    pares de SPRITES, e artwork e outro conjunto, com 2.832 imagens e nomes proprios.
-    Mas a ideia e a mesma -- sorteio deterministico, com a mesma semente, para que o
-    conjunto de teste seja estavel entre rodadas e as medicoes continuem comparaveis.
 
-    O filtro por categoria vem do `artwork/indice.csv`, que o downloader gravou
-    justamente para permitir isto sem reparsear HTML nem rebaixar nada.
+def teste_do_grupo(grupo):
+    """Caminhos das artes de TESTE de um grupo: toda arte cuja especie esta em
+    splits/teste-especies.txt. A lista e fixa e versionada; o treino e o grupo menos ela.
+
+    Historia: ate 17/11/2026 o teste era sorteado na hora por arte, e o antigo --categoria
+    sorteava OUTRO split no subconjunto (as LoRAs Sugimori de entao treinaram em 112 das 300
+    artes de teste). Em 18/11 virou 100 artes fixas por grupo. Em 19/11 virou 10% das
+    ESPECIES, comum aos 3 grupos: antes a mesma especie (ate como shiny, com o mesmo traco)
+    ficava no treino em outra arte. Escolha do sorteio em splits/gera_split.py.
     """
-    import csv
-    import random as _random
+    teste_esp = especies_de_teste()
+    return [p for p, e in especies(grupo).items() if e in teste_esp]
 
-    # Com os padroes, e exatamente o sorteio de sempre: o anime entra por OUTRA chamada,
-    # com split proprio, para nao mexer nas 300 artes de teste do leaderboard.
-    raiz = Path(raiz)
+
+def caminhos_grupo(grupo):
+    """Caminhos de TREINO de um grupo: todas as artes processadas menos as de teste."""
+    raiz = Path(dir_processadas(grupo))
     if not raiz.exists():
-        raise SystemExit(f'{raiz} nao existe -- rode artwork-processer.py antes')
-
-    permitidos = None
-    if categoria:
-        indice = Path(origem) / 'indice.csv'
-        if not indice.exists():
-            raise SystemExit(f'{indice} nao existe, nao da para filtrar por categoria')
-        with indice.open(encoding='utf-8') as fh:
-            # O indice guarda o caminho do arquivo ORIGINAL (jpg/png); o processado
-            # tem o mesmo nome com extensao .png.
-            permitidos = {Path(l['arquivo']).stem for l in csv.DictReader(fh)
-                          if l['categoria'].startswith(categoria)}
-        if not permitidos:
-            raise SystemExit(f'--categoria {categoria!r}: nenhuma linha no indice')
-
+        raise SystemExit(f'{raiz} nao existe -- rode artwork-processer.py --grupo {grupo}')
     todos = sorted(raiz.glob('gen*/*.png'))
-    if permitidos is not None:
-        todos = [p for p in todos if p.stem in permitidos]
-    if not todos:
-        raise SystemExit('nenhuma arte encontrada com esse filtro')
+    teste = set(teste_do_grupo(grupo))
+    treino = [p for p in todos if p not in teste]
+    print(f'{grupo}: {len(todos)} imagens, {len(treino)} de treino, {len(teste)} de teste')
+    return treino
 
-    sorteio = _random.Random(SEMENTE_ARTWORK)
-    ordem = list(range(len(todos)))
-    sorteio.shuffle(ordem)
-    treino = sorted(ordem[TESTE_ARTWORK:])
-    rotulo = f'{rotulo}[{categoria}]' if categoria else rotulo
-    print(f'{rotulo}: {len(todos)} imagens, {len(treino)} de treino, '
-          f'{min(TESTE_ARTWORK, len(todos))} reservadas para teste')
-    return [todos[i] for i in treino]
+
+def grupos_de(dados):
+    """'sugimori+outros' -> ['sugimori', 'outros']; erro de argumento se houver grupo invalido."""
+    gs = dados.split('+')
+    ruins = [g for g in gs if g not in GRUPOS]
+    if ruins or len(set(gs)) != len(gs):
+        raise argparse.ArgumentTypeError(
+            f'{dados!r}: use sprites ou grupos de {"/".join(GRUPOS)} unidos por +')
+    return dados
 
 
 def parse_args():
@@ -157,17 +150,13 @@ def parse_args():
     p.add_argument('--out', default='lora-pkmnsprite')
     p.add_argument('--save-every', type=int, default=2000)
     p.add_argument('--workers', type=int, default=4)
-    p.add_argument('--dados', choices=['sprites', 'artwork', 'anime', 'artwork+anime'],
+    p.add_argument('--dados', type=lambda d: d if d == 'sprites' else grupos_de(d),
                    default='sprites',
                    help='de qual conjunto treinar. "sprites" sao os 256x256 de jogo '
-                        '(default, usa o fixed_split de esboco); "artwork" e a '
-                        'arte oficial em 512 px de artwork-processed/; "anime" e a arte de anime de '
-                        'artwork-anime-processed/; "artwork+anime" soma as duas, '
-                        'cada uma com o seu split de teste')
-    p.add_argument('--categoria',
-                   help='com --dados artwork ou artwork+anime: filtra a parte de ARTWORK por categoria do indice '
-                        '(ex. Sugimori). Misturar estilos dilui -- a LoRA das nove '
-                        'geracoes saiu blocada por isso')
+                        '(default, usa o fixed_split de esboco). Para arte, um ou mais grupos '
+                        'unidos por +: sugimori, outros, anime -- ex. "sugimori", '
+                        '"sugimori+outros", "sugimori+outros+anime". Cada grupo tira do '
+                        'treino as artes das especies de splits/teste-especies.txt')
     p.add_argument('--gen', metavar='GERACOES',
                    help='treina so nas geracoes dadas, separadas por virgula '
                         '(ex. gen9 ou gen9,gen7). O dataset inteiro e a media de nove '
@@ -180,7 +169,11 @@ def parse_args():
                    help='continua de uma LoRA ja treinada (.safetensors). So os PESOS '
                         'sao retomados -- o estado do Adam nao e salvo, entao ha um '
                         'solavanco pequeno nos primeiros passos. Para LoRA isso e '
-                        'aceitavel e evita refazer o que ja foi treinado')
+                        'aceitavel e evita refazer o que ja foi treinado. A numeracao '
+                        'CONTINUA do passo do arquivo (lora-step016000 -> o proximo e '
+                        '016000 + --save-every) e a perda.csv recebe as linhas novas, '
+                        'entao use o mesmo --out da rodada original: nada de pasta -cont. '
+                        '--steps conta so os passos NOVOS')
     p.add_argument('--aug', action='store_true',
                    help='augmentacao on-the-fly (espelho, rotacao/escala/translacao leves, '
                         'brilho/contraste minimo). Amplitudes em aug_artwork.py. Desligado '
@@ -246,12 +239,8 @@ def main():
     if args.grad_checkpointing:
         unet.enable_gradient_checkpointing()
 
-    if args.dados in ('artwork', 'anime', 'artwork+anime'):
-        paths = []
-        if 'artwork' in args.dados:
-            paths += caminhos_artwork(args.categoria)
-        if 'anime' in args.dados:
-            paths += caminhos_artwork(None, DIR_ARTWORK_ANIME_PROCESSED, DIR_ARTWORK_ANIME, 'anime')
+    if args.dados != 'sprites':
+        paths = [p for g in args.dados.split('+') for p in caminhos_grupo(g)]
     else:
         _, reais = list_pairs()
         treino_idx, _ = fixed_split(len(reais))
@@ -285,7 +274,26 @@ def main():
     # Log estruturado, alem do stdout: o grafico de perda le daqui em vez de
     # parsear texto, e cada rodada fica com seu proprio arquivo.
     csv = out / 'perda.csv'
-    csv.write_text('passo,perda' + chr(10), encoding='utf-8')
+    # Com --resume a contagem continua do passo do arquivo retomado, na mesma pasta.
+    inicio = 0
+    if args.resume:
+        import re
+        m = re.search(r'lora-step(\d+)', Path(args.resume).name)
+        if not m:
+            raise SystemExit(f'--resume {args.resume}: nome sem lora-stepNNNNNN, nao sei o passo')
+        inicio = int(m.group(1))
+    finais = [inicio + k for k in range(args.save_every, args.steps + 1, args.save_every)]
+    finais += [inicio + args.steps]
+    ja_existem = [n for n in finais if (out / f'lora-step{n:06d}.safetensors').exists()]
+    if ja_existem:
+        raise SystemExit(f'{out} ja tem lora-step{ja_existem[0]:06d}: esta rodada sobrescreveria')
+    if inicio and csv.exists():
+        # Corta o que a rodada original registrou depois do ponto retomado.
+        linhas = csv.read_text(encoding='utf-8').splitlines()
+        linhas = [l for l in linhas[1:] if int(l.split(',')[0]) <= inicio]
+        csv.write_text(chr(10).join(['passo,perda'] + linhas) + chr(10), encoding='utf-8')
+    else:
+        csv.write_text('passo,perda' + chr(10), encoding='utf-8')
     passo, t0, perdas = 0, time.time(), []
     while passo < args.steps:
         for x in ld:
@@ -317,7 +325,7 @@ def main():
             passo += 1
             if passo % 20 == 0:
                 with csv.open('a', encoding='utf-8') as fh:
-                    fh.write(f'{passo},{np.mean(perdas[-20:]):.6f}' + chr(10))
+                    fh.write(f'{inicio + passo},{np.mean(perdas[-20:]):.6f}' + chr(10))
             if passo % 200 == 0:
                 dt = time.time() - t0
                 print(f'passo {passo}/{args.steps} | perda {np.mean(perdas[-200:]):.4f} | '
@@ -326,8 +334,8 @@ def main():
             if passo % args.save_every == 0 or passo == args.steps:
                 StableDiffusionPipeline.save_lora_weights(
                     out, get_peft_model_state_dict(unet),
-                    weight_name=f'lora-step{passo:06d}.safetensors')
-                print(f'  salvo: {out}/lora-step{passo:06d}.safetensors', flush=True)
+                    weight_name=f'lora-step{inicio + passo:06d}.safetensors')
+                print(f'  salvo: {out}/lora-step{inicio + passo:06d}.safetensors', flush=True)
 
     print(f'concluido: {args.steps} passos em {(time.time() - t0) / 3600:.2f} h')
 

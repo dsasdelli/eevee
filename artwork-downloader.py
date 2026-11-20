@@ -14,6 +14,12 @@ pikachu 30), em quatro categorias com padroes de URL diferentes:
 
 Nao ha como enumerar isso sem ler a pagina. Dai este programa existir.
 
+DOIS GRUPOS, DUAS PASTAS
+
+Cada arte vai para o grupo da sua categoria (ver helper.py): categoria com "Sugimori"
+(inclusive a Early) vai para artwork-sugimori/, o resto (Global Link, Other) para
+artwork-outros/. Cada pasta tem o proprio indice.csv.
+
 A GERACAO E A DO POKEMON, NAO A DO JOGO
 
 O sprite-downloader percorre GENERATIONS porque o mesmo bicho tem um sprite por jogo.
@@ -35,10 +41,20 @@ from os import makedirs, path
 import requests
 import yaml
 
-from helper import DIR_ARTWORK
+from helper import dir_artes
 
 PAGINA = 'https://pokemondb.net/artwork/{}'
-INDICE = f'{DIR_ARTWORK}/indice.csv'
+GRUPOS_PDB = ('sugimori', 'outros')
+CABECALHO = ['pokemon', 'geracao', 'categoria', 'variacao', 'url', 'arquivo']
+
+
+def grupo_da_categoria(categoria):
+    """'Early Sugimori artwork - Gold/Silver' -> 'sugimori'; 'Global Link artwork' -> 'outros'."""
+    return 'sugimori' if 'Sugimori' in categoria else 'outros'
+
+
+def indice(grupo):
+    return f'{dir_artes(grupo)}/indice.csv'
 # Identificar-se e o minimo ao varrer mais de mil paginas de um site de terceiros.
 CABECALHOS = {'User-Agent': 'eevee-artwork-downloader/1.0 (projeto pessoal de dataset)'}
 PAUSA = 0.4          # segundos entre requisicoes
@@ -135,7 +151,6 @@ def main():
         if args.limite:
             escolhidos = escolhidos[:args.limite]
 
-    makedirs(DIR_ARTWORK, exist_ok=True)
     # Abre o indice em modo append e so escreve o cabecalho se o arquivo e novo: o
     # programa e retomavel, e truncar aqui apagaria o registro das rodadas anteriores.
     #
@@ -143,27 +158,27 @@ def main():
     # baixada seria registrada de novo. Por isso as linhas ja presentes sao carregadas
     # antes e usadas para nao reescrever -- sem isso o indice ficava inutil depois de
     # poucas rodadas (medido: 84 linhas para 69 imagens).
-    novo_indice = not path.exists(INDICE)
     ja_no_indice = set()
-    if not novo_indice:
-        with open(INDICE, newline='', encoding='utf-8') as fh:
-            for linha in csv.reader(fh):
-                if len(linha) >= 6:
-                    ja_no_indice.add((linha[0], linha[5]))
+    arquivos, escritores = {}, {}
+    for g in GRUPOS_PDB:
+        makedirs(dir_artes(g), exist_ok=True)
+        novo = not path.exists(indice(g))
+        if not novo:
+            with open(indice(g), newline='', encoding='utf-8') as fh:
+                for linha in csv.reader(fh):
+                    if len(linha) >= 6:
+                        ja_no_indice.add((linha[0], linha[5]))
+        arquivos[g] = open(indice(g), 'a', newline='', encoding='utf-8')
+        escritores[g] = csv.writer(arquivos[g])
+        if novo:
+            escritores[g].writerow(CABECALHO)
     sessao = requests.Session()
     baixadas = existentes = sem_arte = 0
     falhas = []
 
-    with open(INDICE, 'a', newline='', encoding='utf-8') as fh:
-        escritor = csv.writer(fh)
-        if novo_indice:
-            escritor.writerow(['pokemon', 'geracao', 'categoria', 'variacao',
-                               'url', 'arquivo'])
-
+    try:
         for i, nome in enumerate(escolhidos, 1):
             gen = f"gen{pokemons[nome]['gen']}"
-            destino = path.join(DIR_ARTWORK, gen)
-            makedirs(destino, exist_ok=True)
 
             try:
                 html = busca(sessao, PAGINA.format(nome))
@@ -184,10 +199,13 @@ def main():
 
             novas = 0
             for categoria, variacao, url in artes:
+                grupo = grupo_da_categoria(categoria)
+                destino = path.join(dir_artes(grupo), gen)
+                makedirs(destino, exist_ok=True)
                 arquivo = nome_arquivo(url)
                 caminho = path.join(destino, arquivo)
                 if (nome, caminho) not in ja_no_indice:
-                    escritor.writerow([nome, gen, categoria, variacao, url, caminho])
+                    escritores[grupo].writerow([nome, gen, categoria, variacao, url, caminho])
                     ja_no_indice.add((nome, caminho))
                 if path.exists(caminho):
                     existentes += 1
@@ -210,14 +228,18 @@ def main():
 
             print(f'[{i}/{len(escolhidos)}] {nome} ({gen}): {len(artes)} artes, '
                   f'{novas} baixadas, {len(artes) - novas} ja existentes')
-            fh.flush()          # retomada depois de Ctrl+C nao perde o indice
+            for fh in arquivos.values():
+                fh.flush()      # retomada depois de Ctrl+C nao perde o indice
             time.sleep(args.pausa)
+    finally:
+        for fh in arquivos.values():
+            fh.close()
 
     print(f'\nbaixadas {baixadas} | ja existentes {existentes} | '
           f'sem arte {sem_arte} | falhas {len(falhas)}')
     if falhas:
         print('falhas:', ', '.join(falhas[:20]) + (' ...' if len(falhas) > 20 else ''))
-    print(f'indice em {INDICE}')
+    print('indices em', ', '.join(indice(g) for g in GRUPOS_PDB))
 
 
 if __name__ == '__main__':

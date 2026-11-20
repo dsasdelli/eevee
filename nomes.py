@@ -6,7 +6,7 @@ COMO FUNCIONA
 
 A imagem gerada (crua, antes de reduzir) vai para o espaco do DINOv2 -- o mesmo extrator
 do leaderboard -- e e comparada por cosseno com uma base unica: as artes de
-artwork-processed MAIS os sprites de sprites-processed. As duas juntas para o nome sair
+sugimori e outros (artwork-<grupo>-processed) MAIS os sprites de sprites-processed. As duas juntas para o nome sair
 igual bem com modelo de artwork e de sprite. Varias imagens da mesma especie (megas,
 formas, sprite e arte) contam como UMA especie, pela melhor parecida.
 
@@ -28,6 +28,8 @@ from PIL import Image
 RAIZ = Path(__file__).parent
 CACHE = RAIZ / 'nomes-dino.npz'
 VOGAIS = 'aeiouy'
+# Anime fica de fora: e um estilo so, e a base serve para reconhecer a ESPECIE.
+GRUPOS_BASE = ('sugimori', 'outros')
 
 
 def _branco(im):
@@ -43,13 +45,15 @@ def _branco(im):
 def _base():
     """Lista (caminho, especie) de artes + sprites."""
     itens, especies = [], set()
-    with open(RAIZ / 'artwork' / 'indice.csv', encoding='utf-8') as f:
-        for lin in csv.DictReader(f):
-            stem = Path(lin['arquivo'].replace('\\', '/')).stem
-            p = RAIZ / 'artwork-processed' / lin['geracao'] / f'{stem}.png'
-            if p.exists():
-                itens.append((p, lin['pokemon']))
-                especies.add(lin['pokemon'])
+    from helper import dir_artes, dir_processadas
+    for g in GRUPOS_BASE:
+        with open(RAIZ / dir_artes(g) / 'indice.csv', encoding='utf-8') as f:
+            for lin in csv.DictReader(f):
+                stem = Path(lin['arquivo'].replace('\\', '/')).stem
+                p = RAIZ / dir_processadas(g) / lin['geracao'] / f'{stem}.png'
+                if p.exists():
+                    itens.append((p, lin['pokemon']))
+                    especies.add(lin['pokemon'])
     for p in sorted((RAIZ / 'sprites-processed').glob('gen*/*.png')):
         stem = p.stem
         # Forma de sprite ("deoxys-attack") cai na especie se o prefixo for conhecido.
@@ -159,10 +163,10 @@ if __name__ == '__main__':
     n = Nomeador()
     print(f'base: {len(n.especies)} imagens, {len(n.todas)} especies')
     for esp in ['pikachu', 'charizard', 'bulbasaur', 'gengar', 'lapras']:
-        p = next(RAIZ.glob(f'artwork-processed/gen*/{esp}.png'))
+        p = next(RAIZ.glob(f'artwork-sugimori-processed/gen*/{esp}.png'))
         print(f'  {esp:10s} -> {n.vizinhos(Image.open(p), 4)}')
     rng = random.Random(0)
-    amostra = sorted(RAIZ.glob('artwork-processed/gen*/*.png'))
+    amostra = sorted(p for g in GRUPOS_BASE for p in RAIZ.glob(f'artwork-{g}-processed/gen*/*.png'))
     for semente, p in enumerate(rng.sample(amostra, 20)):
         r = n.nomear(Image.open(p), semente)
         print(f'  {p.stem:22s} {r["nome"]:14s} <- {", ".join(r["inspiracao"])}')

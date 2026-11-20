@@ -1,4 +1,8 @@
-"""Folha 23: os 10 desenhos humanos em lora-art-tudo (4000) contra lora-art-tudo-aug.
+"""REGISTRO HISTORICO, nao roda mais: as LoRAs lora-art-sugimori* foram apagadas em
+18/11/2026 (treinaram em 112 das 300 artes de teste da epoca) e lora-art-tudo-aug virou
+lora-sugimori-outros-aug. A Sugimori atual e lora-sugimori-aug.
+
+Folha 24: os 10 desenhos humanos nas LoRAs Sugimori contra lora-art-tudo-aug.
 
 Mesmo pipeline da varre_ckpt.py (ControlNet scribble, forca 0,7, 28 passos, cfg 7,5,
 semente 42), saida CRUA sem tirar_fundo, porque o fundo e um dos criterios.

@@ -60,17 +60,23 @@ MODELOS = {
         'arquivo': RAIZ / 'lora-gen9' / 'lora-step003000.safetensors',
         'nota': 'Treinada so nos 551 sprites da gen9. Bate a nitidez dos sprites reais.',
     },
-    'art-aug-16k': {
-        'rotulo': 'Artwork oficial (aug 16000)',
-        'arquivo': RAIZ / 'lora-art-tudo-aug' / 'lora-step016000.safetensors',
-        'nota': 'Mesma LoRA augmentada, treino longo: mais detalhe e ornamento, as vezes '
-                'acrescenta elementos que nao estao no desenho.',
+    'sugimori-outros-aug-8k': {
+        'rotulo': 'Sugimori + outros (aug 8000)',
+        'arquivo': RAIZ / 'lora-sugimori-outros-aug' / 'lora-step008000.safetensors',
+        'nota': '2.560 artes Sugimori + outros (split por especie), com augmentacao. Empata com '
+                'a de 16000 no leaderboard v4 e e a de fundo mais limpo.',
     },
-    'sug-aug-8k': {
-        'rotulo': 'Artwork Sugimori (aug 8000)',
-        'arquivo': RAIZ / 'lora-art-sugimori-aug' / 'lora-step008000.safetensors',
-        'nota': 'So as 983 artes Sugimori, com augmentacao. Estilo mais pintado e suave, '
-                'contorno menos marcado; um pouco mais de fundo colorido que a aug 8000.',
+    'sugimori-outros-anime-aug-12k': {
+        'rotulo': 'Sugimori + outros + anime (aug 12000)',
+        'arquivo': RAIZ / 'lora-sugimori-outros-anime-aug' / 'lora-step012000.safetensors',
+        'nota': 'Toda a arte: 3.941 artes dos tres grupos (split por especie), com augmentacao. '
+                'No leaderboard v4 fica atras das especializadas em todas as colunas; serve '
+                'para comparar pelo olho.',
+    },
+    'sugimori-aug-12k': {
+        'rotulo': 'Sugimori (aug 12000)',
+        'arquivo': RAIZ / 'lora-sugimori-aug' / 'lora-step012000.safetensors',
+        'nota': 'So as 1.526 artes Sugimori de treino (split por especie), Early incluida, com augmentacao.',
     },
     'sprite': {
         'rotulo': 'Sprite classico (9 geracoes)',

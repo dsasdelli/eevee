@@ -12,7 +12,7 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 from aug_artwork import augmenta, borda_branca
-from helper import DIR_ARTWORK_PROCESSED
+from helper import dir_processadas
 
 SAIDA = Path('predictions/difusao/22-augmentacao-amostras.png')
 LADO = 192
@@ -43,7 +43,8 @@ def main():
     import sys
     if '--sprites' in sys.argv:
         return folha_sprites()
-    todos = sorted(Path(DIR_ARTWORK_PROCESSED).glob('gen*/*.png'))
+    todos = sorted(p for g in ('sugimori', 'outros')
+                   for p in Path(dir_processadas(g)).glob('gen*/*.png'))
     random.Random(7).shuffle(todos)
     brancas, cenario = [], []
     for p in todos:
